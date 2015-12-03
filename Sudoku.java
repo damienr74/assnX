@@ -25,7 +25,7 @@ public class Sudoku {
 		}
 		calcPossible(grid);
 
-		solve(grid);
+		System.out.println(solve(grid));
 
 		/**
 		 * output for solved sudoku :)
@@ -42,12 +42,54 @@ public class Sudoku {
 	}
 
 	public static boolean solve(int[][] grid) {
-		//if(invalid(grid)) {
+		if(invalid(grid)) {
+		 System.out.println(false);
 			return false;
-		//} else if (isComplete(grid)) {
+		} else if (isComplete(grid)) {
 			return true;
-		//}
+		}
 		Options best = bestBlank(grid);
+		for( Integer option : best.options ) {
+			System.out.println("(" + best.x + "," + best.y + ")");
+			grid[best.x][best.y] = option;
+			cols[best.x] = (cols[best.x] | (1 << option));
+			rows[best.x] = (rows[best.x] | (1 << option));
+			quad[best.x/3][best.y/3] = (quad[best.x/3][best.y/3] | (1 << option));
+			if(solve(grid)) {
+				return true;
+			}
+			grid[best.x][best.y] = 0;
+			cols[best.x] = (cols[best.x] & ~(1 << option));
+			rows[best.x] = (rows[best.x] & ~(1 << option));
+			quad[best.x/3][best.y/3] = (quad[best.x/3][best.y/3] & ~(1 << option));
+		}
+		return false;
+	}
+
+	public static boolean invalid(int[][] grid) {
+		for(int i = 0; i < 9; i++) {
+			for(int j = 0; j < 9; j++) {
+				if(grid[j][i] == 0) {
+				/*
+				 * check if there are available options to put in this place.
+				 * if there are none, return false, if there are, return true.
+				 */
+					Options tmp = countOpt(j, i);
+					System.out.println(tmp.count);
+					if(tmp.count == 0) return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public static boolean isComplete(int[][] grid) {
+		for(int i = 0; i < 9; i++) {
+			for(int j = 0; j < 9; j++) {
+				if(grid[j][i] == 0) return false;
+			}
+		}
+		return true;
 	}
 
 	public static void calcPossible(int[][] grid) {
@@ -64,7 +106,7 @@ public class Sudoku {
 	}
 
 	public static Options bestBlank(int[][] grid) {
-		Options best;
+		Options best = null;
 		for(int i = 0; i < 9; i++) {
 			for(int j = 0; j < 9; j++) {
 				if(grid[j][i] == 0) {
@@ -83,21 +125,21 @@ public class Sudoku {
 	public static Options countOpt(int column, int row) {
 		Options tmp = new Options(column, row);
 		for(int i = 0; i < 9; i++) {
-			if((rows[row] & (1 << i)) != 0) {
+			if((rows[row] & (1 << i)) == 0) {
 				tmp.count++;
-				tmp.options.add(i);
-			} else if((cols[column] & (1 << i)) != 0) {
+				tmp.options.add(i+1);
+			} else if((cols[column] & (1 << i)) == 0) {
 				tmp.count++;
-				tmp.options.add(i);
-			} else if((quad[column/3][row/3] & (1 << i)) != 0) {
+				tmp.options.add(i+1);
+			} else if((quad[column/3][row/3] & (1 << i)) == 0) {
 				tmp.count++;
-				tmp.options.add(i);
+				tmp.options.add(i+1);
 			}
 		}
 		return tmp;
 	}
 
-	class Options {
+	static class Options {
 		int x;
 		int y;
 		ArrayList<Integer> options;
