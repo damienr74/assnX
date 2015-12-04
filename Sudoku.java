@@ -25,42 +25,38 @@ public class Sudoku {
 		}
 		calcPossible(grid);
 
-		System.out.println(solve(grid));
+		solve(grid);
 
 		/**
 		 * output for solved sudoku :)
 		 */
-		for(int i = 0; i < 9;) {
+		for(int i = 0; i < 9;i++) {
 			for(int j = 0; j < 9;) {
 				System.out.print(grid[j][i]);
 				if(++j < 9) System.out.print(" ");
-				if(j % 3 == 0) System.out.print(" ");
 			}
 			System.out.println();
-			if((++i % 3 == 0) && i != 9) System.out.println();
 		}
 	}
 
 	public static boolean solve(int[][] grid) {
 		if(invalid(grid)) {
-		 System.out.println(false);
 			return false;
 		} else if (isComplete(grid)) {
 			return true;
 		}
 		Options best = bestBlank(grid);
 		for( Integer option : best.options ) {
-			System.out.println("(" + best.x + "," + best.y + ")");
-			grid[best.x][best.y] = option;
+			grid[best.x][best.y] = option + 1;
 			cols[best.x] = (cols[best.x] | (1 << option));
-			rows[best.x] = (rows[best.x] | (1 << option));
+			rows[best.y] = (rows[best.y] | (1 << option));
 			quad[best.x/3][best.y/3] = (quad[best.x/3][best.y/3] | (1 << option));
 			if(solve(grid)) {
 				return true;
 			}
 			grid[best.x][best.y] = 0;
 			cols[best.x] = (cols[best.x] & ~(1 << option));
-			rows[best.x] = (rows[best.x] & ~(1 << option));
+			rows[best.y] = (rows[best.y] & ~(1 << option));
 			quad[best.x/3][best.y/3] = (quad[best.x/3][best.y/3] & ~(1 << option));
 		}
 		return false;
@@ -75,12 +71,11 @@ public class Sudoku {
 				 * if there are none, return false, if there are, return true.
 				 */
 					Options tmp = countOpt(j, i);
-					System.out.println(tmp.count);
-					if(tmp.count == 0) return false;
+					if(tmp.count == 0) return true;
 				}
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public static boolean isComplete(int[][] grid) {
@@ -113,8 +108,6 @@ public class Sudoku {
 					Options tmp = countOpt(j,i);
 					if(best == null || best.count > tmp.count) {
 						best = tmp;
-						best.x = j;
-						best.y = i;
 					}
 				}
 			}
@@ -126,14 +119,12 @@ public class Sudoku {
 		Options tmp = new Options(column, row);
 		for(int i = 0; i < 9; i++) {
 			if((rows[row] & (1 << i)) == 0) {
-				tmp.count++;
-				tmp.options.add(i+1);
-			} else if((cols[column] & (1 << i)) == 0) {
-				tmp.count++;
-				tmp.options.add(i+1);
-			} else if((quad[column/3][row/3] & (1 << i)) == 0) {
-				tmp.count++;
-				tmp.options.add(i+1);
+				if((cols[column] & (1 << i)) == 0) {
+					if((quad[column/3][row/3] & (1 << i)) == 0) {
+						tmp.count++;
+						tmp.options.add(i);
+					}
+				}
 			}
 		}
 		return tmp;
