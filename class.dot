@@ -1,0 +1,8 @@
+digraph structs {
+graph [ dpi = 300];
+node [shape=record,fontname=inconsolata,fontsize=18,style="setlinewidth(8)"];
+
+	struct1 [shape=record,label="{Options \n \<\<static\>\> |\
+	\l+ x : int \l+ y : int \l+ count : int\
+	\l+ options : ArrayList\<Integer\> \n |\l+ Options( int, int )}"];
+}
